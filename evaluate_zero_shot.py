@@ -24,9 +24,17 @@ def evaluate_unilabel(y_true, y_pred, labels=None):
     """
     metrics = {}
     metrics['accuracy'] = accuracy_score(y_true, y_pred)
-    metrics['precision'] = precision_score(y_true, y_pred, average='macro', labels=labels)
-    metrics['recall'] = recall_score(y_true, y_pred, average='macro', labels=labels)
-    metrics['f1'] = f1_score(y_true, y_pred, average='macro', labels=labels)
+    metrics['precision_macro'] = precision_score(y_true, y_pred, average='macro', labels=labels)
+    metrics['recall_macro'] = recall_score(y_true, y_pred, average='macro', labels=labels)
+    metrics['f1_macro'] = f1_score(y_true, y_pred, average='macro', labels=labels)
+    metrics['precision_weighted'] = precision_score(y_true, y_pred, average='weighted', labels=labels)
+    metrics['recall_weighted'] = recall_score(y_true, y_pred, average='weighted', labels=labels)
+    metrics['f1_weighted'] = f1_score(y_true, y_pred, average='weighted', labels=labels)
+    try:
+        from sklearn.metrics import matthews_corrcoef
+        metrics['mcc'] = matthews_corrcoef(y_true, y_pred)
+    except ImportError:
+        metrics['mcc'] = None
     metrics['classification_report'] = classification_report(y_true, y_pred, labels=labels)
     return metrics
 
@@ -53,7 +61,15 @@ def evaluate_multilabel(y_true, y_pred, threshold=0.5):
     metrics['precision_macro'] = precision_score(y_true, y_pred_bin, average='macro', zero_division=0)
     metrics['recall_macro'] = recall_score(y_true, y_pred_bin, average='macro', zero_division=0)
     metrics['f1_macro'] = f1_score(y_true, y_pred_bin, average='macro', zero_division=0)
+    metrics['precision_weighted'] = precision_score(y_true, y_pred_bin, average='weighted', zero_division=0)
+    metrics['recall_weighted'] = recall_score(y_true, y_pred_bin, average='weighted', zero_division=0)
+    metrics['f1_weighted'] = f1_score(y_true, y_pred_bin, average='weighted', zero_division=0)
     metrics['f1_micro'] = f1_score(y_true, y_pred_bin, average='micro', zero_division=0)
+    try:
+        from sklearn.metrics import matthews_corrcoef
+        metrics['mcc'] = matthews_corrcoef(y_true.flatten(), y_pred_bin.flatten())
+    except ImportError:
+        metrics['mcc'] = None
     # Optional: ROC AUC and Average Precision if scores are available
     try:
         metrics['roc_auc_macro'] = roc_auc_score(y_true, y_pred, average='macro')
